@@ -1,0 +1,9 @@
+POST http://localhost:3040/api/blogs
+Content-Type: application/json
+
+{
+  "title": "Vscode rest client is pretty cool",
+  "author": "Will",
+  "url": "www.sample.com",
+  "likes": 3
+}
