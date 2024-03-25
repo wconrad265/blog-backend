@@ -3,7 +3,7 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt");
 
 userRouter.post("/", async (request, response) => {
-  const { username, password } = request.body;
+  const { username, password, name } = request.body;
 
   if (!password || password.length < 3) {
     return response.status(400).json({
@@ -16,8 +16,9 @@ userRouter.post("/", async (request, response) => {
   const passwordHash = await bcrypt.hash(password, saltRounds);
 
   const newUser = new User({
-    username: username,
-    passwordHash: passwordHash,
+    username,
+    name,
+    passwordHash,
   });
 
   await newUser.save();

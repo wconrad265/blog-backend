@@ -17,6 +17,7 @@ describe("When there is initially one user in the database", () => {
     const passwordHash = await bcrypt.hash("1234", 10);
     const user = new User({
       username: "root",
+      name: 'Root Btw',
       passwordHash,
     });
 
@@ -28,6 +29,7 @@ describe("When there is initially one user in the database", () => {
 
     const newUser = {
       username: "will",
+      name: 'Will Btw',
       password: "12345",
     };
 
@@ -70,6 +72,27 @@ describe("When there is initially one user in the database", () => {
 
       const noPassword = {
         username: "12345",
+      };
+
+      await api
+        .post("/api/users")
+        .send(noPassword)
+        .expect(400)
+        .expect("Content-Type", /application\/json/);
+
+      const usersAtEnd = await helper.usersInDB();
+      const usernames = usersAtEnd.map((u) => u.username);
+
+      assert.strictEqual(usersAtEnd.length, usersAtStart.length);
+      assert(!usernames.includes(noPassword.username));
+    });
+
+    test("when name is not given", async () => {
+      const usersAtStart = await helper.usersInDB();
+
+      const noPassword = {
+        username: "12345",
+        password: '12345'
       };
 
       await api

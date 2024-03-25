@@ -63,6 +63,12 @@ const blogs = [
   },
 ];
 
+const rootUser = {
+  username: "root",
+  name: "Root Btw",
+  password: "12345",
+};
+
 const blogsInDB = async () => {
   const blogs = await Blog.find({});
   return blogs.map((blog) => blog.toJSON());
@@ -89,6 +95,7 @@ const nonExistingId = async () => {
 module.exports = {
   listWithOneBlog,
   blogs,
+  rootUser,
   blogsInDB,
   nonExistingId,
   usersInDB,

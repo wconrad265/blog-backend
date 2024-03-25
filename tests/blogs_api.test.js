@@ -1,19 +1,49 @@
-const { test, beforeEach, after, describe } = require("node:test");
+const { test, beforeEach, after, describe, before } = require("node:test");
 const assert = require("node:assert");
 const Blog = require("../models/blog");
-
+const User = require("../models/user");
 const mongoose = require("mongoose");
 const helper = require("./test_helper");
 const app = require("../app");
 const supertest = require("supertest");
+const { request } = require("node:http");
 
 const api = supertest(app);
 
 describe("When there are some blog posts saved", () => {
+  let authorization;
+  let userId;
+
+  //create initial user in database
+  before(async () => {
+    await User.deleteMany({});
+
+    const response = await api
+      .post("/api/users")
+      .send(helper.rootUser)
+      .expect(201);
+
+    userId = response.body.id;
+  });
+
+  //get token for initial user in database
+  before(async () => {
+    const response = await api
+      .post("/api/login")
+      .send(helper.rootUser)
+      .expect(200);
+
+    authorization = { authorization: `Bearer ${response.body.token}` };
+  });
+
   beforeEach(async () => {
     await Blog.deleteMany({});
+    const user = await User.findById(userId);
 
-    const blogObject = helper.blogs.map((blog) => new Blog(blog));
+    const blogObject = helper.blogs.map(
+      (blog) => new Blog({ ...blog, user: user._id })
+    );
+
     const promiseArray = blogObject.map((blog) => blog.save());
 
     await Promise.all(promiseArray);
@@ -54,6 +84,7 @@ describe("When there are some blog posts saved", () => {
       await api
         .post("/api/blogs")
         .send(blog)
+        .set(authorization)
         .expect(201)
         .expect("Content-Type", /application\/json/);
 
@@ -75,6 +106,7 @@ describe("When there are some blog posts saved", () => {
       await api
         .post("/api/blogs")
         .send(blog)
+        .set(authorization)
         .expect(201)
         .expect("Content-Type", /application\/json/);
 
@@ -105,9 +137,43 @@ describe("When there are some blog posts saved", () => {
         likes: 30,
       };
 
-      await api.post("/api/blogs").send(noTitleBlog).expect(400);
-      await api.post("/api/blogs").send(noUrlBlog).expect(400);
-      await api.post("/api/blogs").send(noTitleAndUrlBlog).expect(400);
+      await api
+        .post("/api/blogs")
+        .send(noTitleBlog)
+        .set(authorization)
+        .expect(400);
+      await api
+        .post("/api/blogs")
+        .send(noUrlBlog)
+        .set(authorization)
+        .expect(400);
+      await api
+        .post("/api/blogs")
+        .send(noTitleAndUrlBlog)
+        .set(authorization)
+        .expect(400);
+    });
+
+    test("If token is not provided, creation fails with 401 status code", async () => {
+      const blog = {
+        title: "This is a test",
+        author: "will",
+        url: "http://www.test.com",
+        likes: 30,
+      };
+
+      await api
+        .post("/api/blogs")
+        .send(blog)
+        .expect(401)
+        .expect("Content-Type", /application\/json/);
+
+      const blogsAtEnd = await helper.blogsInDB();
+
+      assert.strictEqual(blogsAtEnd.length, helper.blogs.length);
+
+      const titles = blogsAtEnd.map((b) => b.title);
+      assert(!titles.includes("This is a test"));
     });
   });
 
@@ -116,7 +182,10 @@ describe("When there are some blog posts saved", () => {
       const blogsAtStart = await helper.blogsInDB();
 
       const blogToDelete = blogsAtStart[0];
-      await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204);
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .set(authorization)
+        .expect(204);
 
       const blogsAtEnd = await helper.blogsInDB();
 
@@ -125,6 +194,21 @@ describe("When there are some blog posts saved", () => {
       const titles = blogsAtEnd.map((b) => b.title);
 
       assert(!titles.includes(blogToDelete.title));
+    });
+
+    test("fails with 401 status code if token is not provided", async () => {
+      const blogsAtStart = await helper.blogsInDB();
+
+      const blogToDelete = blogsAtStart[0];
+      await api.delete(`/api/blogs/${blogToDelete.id}`).expect(401);
+
+      const blogsAtEnd = await helper.blogsInDB();
+
+      assert.deepEqual(blogsAtEnd.length, helper.blogs.length);
+
+      const titles = blogsAtEnd.map((b) => b.title);
+
+      assert(titles.includes(blogToDelete.title));
     });
   });
 
