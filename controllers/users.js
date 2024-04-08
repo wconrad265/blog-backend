@@ -32,16 +32,3 @@ userRouter.get("/", async (request, response) => {
   response.json(users);
 });
 module.exports = userRouter;
-/*
-  -Implement a way to create new users by doing an HTTP POST request to address api/users. 
-   Users have a username, password and name.
-
-  Steps
-    - install bcrypt
-    - create user schema
-    - create router with express controller for users
-      - create route to adding a new user
-    - add userRouter to app.js
-    - update middleware to handle errors for duplicates
-  
-*/

@@ -26,6 +26,11 @@ blogsRouter.post("/", async (request, response) => {
   });
 
   const newBlog = await blog.save();
+  
+  await newBlog.populate("user", {
+    username: 1,
+    name: 1,
+  });
 
   response.status(201).json(newBlog);
 });
@@ -59,7 +64,7 @@ blogsRouter.put("/:id", async (request, response) => {
 
   const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, {
     new: true,
-  });
+  }).populate("user", { username: 1, name: 1 });
 
   if (!updatedBlog) response.send(400).end();
 
