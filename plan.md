@@ -1,10 +1,14 @@
-<!-- - Add the name field to usernames and make it required -->
-<!-- - Implement token-based authentication according to part 4 chapter Token authentication. (done) -->
-<!-- - validate that a valid token must is sent with the HTTP post request -->
-<!-- - refactor taking the token extractor to a middleware. The middleware should take the token from the Authorization header and assign it to the token field of the request object. -->
-- Blogs can only be deleted by users who added it
-  - the token sent with the request, must match the original blog creator
-- create user extractor
-  - adds the username to the request
-- Fix all the tests
-- Write a nest test that ends with a proper status code is a token is not provided
+<!-- 1. Set up posgress database
+2. Install pg
+3. add postgres connection string to .env file
+4. add postgres uri to config file
+5. create db-query.js
+   1. copy file from LS189 and update it to work with our new database
+6. copy over pg persistance
+   1. we only need the sections that relate to user information
+7. update routes in user router to use pg persistance -->
+8. update login route to work with pg persistance
+9. update middleware
+   1.  userExtractor to search postgress database for user
+10. update blogs controller routes
+    1.  

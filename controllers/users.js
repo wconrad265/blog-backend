@@ -1,6 +1,6 @@
 const userRouter = require("express").Router();
-const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const pgService = require("../utils/pgService");
 
 userRouter.post("/", async (request, response) => {
   const { username, password, name } = request.body;
@@ -15,19 +15,20 @@ userRouter.post("/", async (request, response) => {
   const saltRounds = 10;
   const passwordHash = await bcrypt.hash(password, saltRounds);
 
-  const newUser = new User({
+  const id = await pgService.createUser(username, name, passwordHash);
+
+  const newUser = {
+    id,
     username,
     name,
     passwordHash,
-  });
-
-  await newUser.save();
+  };
 
   response.status(201).json(newUser);
 });
 
 userRouter.get("/", async (request, response) => {
-  const users = await User.find({});
+  const users = await pgService.getAllUsers();
 
   response.json(users);
 });

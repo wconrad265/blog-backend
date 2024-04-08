@@ -1,4 +1,4 @@
-const User = require("../models/user");
+const pgService = require("./pgService");
 const logger = require("./logger");
 const jwt = require("jsonwebtoken");
 
@@ -39,7 +39,6 @@ const errorHandler = (error, request, response, next) => {
 
 const tokenExtractor = (request, response, next) => {
   const authorization = request.get("authorization");
-  
   if (authorization && authorization.startsWith("Bearer ")) {
     const token = authorization.replace("Bearer ", "");
     request.token = jwt.verify(token, process.env.SECRET);
@@ -53,12 +52,21 @@ const tokenExtractor = (request, response, next) => {
 const userExtractor = async (request, response, next) => {
   const token = request.token;
   if (token !== null) {
-    request.user = await User.findById(token.id);
+    request.userId = token.id;
   } else {
-    request.user = null;
+    request.username = null;
   }
 
   next();
+};
+
+const requiresAuthentication = (request, response, next) => {
+  if (!request.token || !request.userId) {
+    console.log("UNauthorized");
+    response.redirect(302, "/api/login");
+  } else {
+    next();
+  }
 };
 
 module.exports = {
@@ -67,4 +75,5 @@ module.exports = {
   errorHandler,
   tokenExtractor,
   userExtractor,
+  requiresAuthentication,
 };

@@ -1,6 +1,6 @@
 POST http://localhost:3040/api/blogs
 Content-Type: application/json
-authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IndpbGwiLCJpZCI6IjY2MDAzY2M5ZTIxNWNlZTNjMWM0MDc4MCIsImlhdCI6MTcxMTI5MTYwNiwiZXhwIjoxNzExMjk1MjA2fQ.J07LySQ9bjKxKGG_Arj3wN7zrig4IMMW6fI-lQiqoZw
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IndpbGwiLCJpZCI6IjljZDg5NTQ0LTY4ZDMtNDM0MS05ZTM5LTk2NDM3NDIwMWVhNyIsImlhdCI6MTcxMjYwNzk4MywiZXhwIjoxNzEyNjExNTgzfQ.BdUls17tjEpl_IaquGp36ssXfwHjmF4CzTCDUUtX-2E
 
 {
   "title": "Thnings I don't know yet",

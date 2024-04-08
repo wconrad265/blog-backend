@@ -1,24 +1,23 @@
 const loginRouter = require("express").Router();
-const User = require("../models/user");
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const pgService = require("../utils/pgService");
 
 loginRouter.post("/", async (request, response) => {
   const { username, password } = request.body;
 
-  const user = await User.findOne({ username });
-  const passwordCorrect =
-    user === null ? false : bcrypt.compare(password, user.passwordHash);
+  const passwordCorrect = await pgService.authenticate(username, password);
 
-  if (!user || !passwordCorrect) {
+  if (!passwordCorrect) {
     return response(401).json({
       error: "invalid username or password",
     });
   }
 
+  const userInfo = await pgService.getUserInfoFromUsername(username);
+  
   const userForToken = {
-    username: user.username,
-    id: user._id,
+    username: userInfo.username,
+    id: userInfo.id,
   };
 
   const token = jwt.sign(userForToken, process.env.SECRET, {
@@ -27,7 +26,7 @@ loginRouter.post("/", async (request, response) => {
 
   response
     .status(200)
-    .send({ token, username: user.username, name: user.name });
+    .send({ token, name: userInfo.name, username: userInfo.username });
 });
 
 module.exports = loginRouter;
