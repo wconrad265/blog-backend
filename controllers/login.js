@@ -8,13 +8,13 @@ loginRouter.post("/", async (request, response) => {
   const passwordCorrect = await pgService.authenticate(username, password);
 
   if (!passwordCorrect) {
-    return response(401).json({
+    return response.status(401).json({
       error: "invalid username or password",
     });
   }
 
   const userInfo = await pgService.getUserInfoFromUsername(username);
-  
+
   const userForToken = {
     username: userInfo.username,
     id: userInfo.id,
